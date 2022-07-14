@@ -1,5 +1,5 @@
-import * as React from "react";
-import { useState } from "react";
+import React from "react";
+import { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -15,25 +15,8 @@ import TextField from "@mui/material/TextField";
 import TablePagination from "@mui/material/TablePagination";
 
 import { Link } from "react-router-dom";
-
-function createData(name, calories, fat, carbs, protein) {
-	return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-	createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-	createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-	createData("Eclair", 262, 16.0, 24, 6.0),
-	createData("Cupcake", 305, 3.7, 67, 4.3),
-	createData("ksbahsbhas", 159, 6.0, 24, 4.0),
-	createData("sasasasas", 237, 9.0, 37, 4.3),
-	createData("sasasasasa", 262, 16.0, 24, 6.0),
-	createData("xzxxzxz", 305, 3.7, 67, 4.3),
-	createData("lkmkomkl", 159, 6.0, 24, 4.0),
-	createData("mnjklnjknjk", 237, 9.0, 37, 4.3),
-	createData("l;k;kjljkbkl;", 262, 16.0, 24, 6.0),
-	createData("lnbnlkn", 305, 3.7, 67, 4.3),
-];
+import BasicModal from "../Common/Modal";
+import axios from "axios";
 
 export default function ProjectList() {
 	// Search inputs
@@ -44,11 +27,20 @@ export default function ProjectList() {
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(4);
 
+	//for modals
+	const [open, setOpen] = useState(false);
+
+	//store projects
+	const [projects, setProjects] = useState([]);
+
+	//delete with modal
+	const [deleteId, setDeleteId] = useState("");
+
 	const handleSearch = (e) => {
 		setSearchData(e.target.value);
 		if (searchData !== null)
 			setShowData(
-				rows?.filter((item) => {
+				projects?.data?.filter((item) => {
 					return item?.name.toLowerCase()?.includes(searchData?.toLowerCase());
 				})
 			);
@@ -63,6 +55,17 @@ export default function ProjectList() {
 		setRowsPerPage(+event.target.value);
 		setPage(0);
 	};
+
+	const handleDelete = (id) => {
+		setOpen(true);
+		setDeleteId(id);
+	};
+	useEffect(() => {
+		axios.get("http://localhost:3003/project").then((response) => {
+			setProjects(response);
+		});
+	}, []);
+
 	return (
 		<>
 			<div className='search'>
@@ -75,72 +78,60 @@ export default function ProjectList() {
 			</div>
 			<TableContainer component={Paper}>
 				<Table sx={{ minWidth: 650 }} aria-label='simple table'>
-					<TableHead>
-						<TableRow>
+					<TableHead sx={{ textAlign: "center" }}>
+						<TableRow sx={{ textAlign: "center" }}>
 							<TableCell>Project Title</TableCell>
-							<TableCell align='right'>Budger</TableCell>
-							<TableCell align='right'>Phone</TableCell>
-							<TableCell align='right'>Email</TableCell>
+							<TableCell align='right'>Duration</TableCell>
+							<TableCell align='right'>Duration Type</TableCell>
+							<TableCell align='right'>Project manager</TableCell>
+							<TableCell align='right'>Department</TableCell>
 							<TableCell align='right'>Actions</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{searchData?.length
 							? showData
-									.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-									.map((row) => (
+									?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+									?.map((row) => (
 										<TableRow
-											key={row.name}
-											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+											key={row?.name}
+											sx={{
+												"&:last-child td, &:last-child th": { border: 0 },
+												textAlign: "center",
+											}}
 										>
 											<TableCell component='th' scope='row'>
-												{row.name}
+												{row?.name}
 											</TableCell>
-											<TableCell align='right'>{row.calories}</TableCell>
-											<TableCell align='right'>{row.fat}</TableCell>
-											<TableCell align='right'>{row.carbs}</TableCell>
-											<TableCell align='right'>
-												<EditIcon sx={{ marginRight: "25px" }} />
-												<DeleteIcon />
-											</TableCell>
+											<TableCell align='right'>{row?.duration}</TableCell>
+											<TableCell align='right'>{row?.duration_type}</TableCell>
+											<TableCell align='right'>{row?.manager}</TableCell>
+											<TableCell align='right'>{row?.department}</TableCell>
 										</TableRow>
 									))
-							: rows
-									.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-									.map((row) => (
+							: projects?.data
+									?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+									?.map((row) => (
 										<TableRow
-											key={row.name}
+											key={row?.name}
 											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 										>
 											<TableCell component='th' scope='row'>
-												{row.name}
+												{row?.name}
 											</TableCell>
-											<TableCell align='right'>{row.calories}</TableCell>
-											<TableCell align='right'>{row.fat}</TableCell>
-											<TableCell align='right'>{row.carbs}</TableCell>
+											<TableCell align='right'>{row?.duration}</TableCell>
+											<TableCell align='right'>{row?.duration_type}</TableCell>
+											<TableCell align='right'>{row?.manager}</TableCell>
+											<TableCell align='right'>{row?.department}</TableCell>
+
 											<TableCell align='right'>
-												<EditIcon sx={{ marginRight: "25px" }} />
-												<DeleteIcon />
+												<Link to={`/edit_project/${row?.id}`}>
+													<EditIcon sx={{ marginRight: "25px" }} />
+												</Link>
+												<DeleteIcon onClick={() => handleDelete(row?.id)} />
 											</TableCell>
 										</TableRow>
 									))}
-						{/* {rows.map((row) => (
-							<TableRow
-								key={row.name}
-								sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-							>
-								<TableCell component='th' scope='row'>
-									{row.name}
-								</TableCell>
-								<TableCell align='right'>{row.calories}</TableCell>
-								<TableCell align='right'>{row.fat}</TableCell>
-								<TableCell align='right'>{row.carbs}</TableCell>
-								<TableCell align='right'>
-									<EditIcon sx={{ marginRight: "25px" }} />
-									<DeleteIcon />
-								</TableCell>
-							</TableRow>
-						))} */}
 					</TableBody>
 				</Table>
 			</TableContainer>
@@ -155,7 +146,7 @@ export default function ProjectList() {
 			>
 				<TablePagination
 					component='div'
-					count={rows.length}
+					count={projects?.data?.length}
 					page={page}
 					onPageChange={handleChangePage}
 					rowsPerPage={rowsPerPage}
@@ -177,6 +168,7 @@ export default function ProjectList() {
 					</Button>
 				</Link>
 			</div>
+			<BasicModal setOpen={setOpen} open={open} deleteId={deleteId} />
 		</>
 	);
 }

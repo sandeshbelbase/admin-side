@@ -1,14 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import CustomInput from "../Common/form/CustomInput/CustomInput";
 import CustomSelect from "../Common/form/CustomSelect/CustomSelect";
 import CustomTextarea from "../Common/form/CustomTextarea/CustomTextarea";
 import { Grid } from "@mui/material";
-import axios from "axios";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import ProjectForm from "./ProjectForm";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
 
 const schema = yup
 	// .object()
@@ -29,8 +29,10 @@ const schema = yup
 	})
 	.required();
 
-const AddProject = () => {
+const EditProject = () => {
 	const navigate = useNavigate();
+	const { id } = useParams();
+	const [singleProject, setSingleProject] = useState([]);
 	const defaultValues = {
 		name: "",
 		duration_type: "month",
@@ -51,16 +53,34 @@ const AddProject = () => {
 	} = useForm({ defaultValues, resolver: yupResolver(schema) });
 
 	const submit = (values) => {
-		axios.post("http://localhost:3003/project", values);
 		console.log("valuesaaaaaa", values);
+		axios.put(`http://localhost:3003/project/${id}`, values);
 		navigate("/");
 	};
+
+	useEffect(() => {
+		id &&
+			axios.get(`http://localhost:3003/project/${id}`).then((response) => {
+				setSingleProject(response);
+			});
+	}, [id]);
+	console.log("singlePor", singleProject);
+	useEffect(() => {
+		setValue("name", singleProject?.data?.name);
+		setValue("duration_type", singleProject?.data?.duration_type);
+		setValue("duration", singleProject?.data?.duration);
+		setValue("manager", singleProject?.data?.manager);
+		setValue("cost", singleProject?.data?.cost);
+		setValue("expiry", singleProject?.data?.expiry);
+		setValue("desc", singleProject?.data?.desc);
+		setValue("department", singleProject?.data?.department);
+	}, [singleProject?.data]);
 
 	return (
 		<>
 			<ProjectForm
 				control={control}
-				buttonName='Add'
+				buttonName='Update'
 				submit={submit}
 				defaultValues={defaultValues}
 				handleSubmit={handleSubmit}
@@ -72,4 +92,4 @@ const AddProject = () => {
 	);
 };
 
-export default AddProject;
+export default EditProject;

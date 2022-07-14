@@ -1,3 +1,7 @@
+p.yupError {
+	color: red;
+	font-size: 11px;
+}
 .project-form {
 	padding: 20px;
 	background-color: #ddd;
@@ -6,23 +10,28 @@
 		.field {
 			display: flex;
 			justify-content: space-between;
-
+			span {
+				width: 30%;
+			}
+			.show {
+				display: flex;
+				flex-direction: column;
+				width: 80%;
+			}
 			input {
 				line-height: 26px;
 				margin-left: 10px;
 				padding: 3px;
-				width: 70%;
+				// width: 100%;
 			}
 			select {
-				height: 28px;
+				height: 38px;
 				margin-left: 10px;
-				width: 72%;
 			}
 			textarea {
 				line-height: 26px;
 				padding: 5px;
 				margin-left: 10px;
-				width: 70%;
 			}
 
 			.twoField {
@@ -65,4 +74,36 @@
 	display: flex;
 	justify-content: flex-end;
 	align-items: center;
+}
+
+.crudBtns {
+	display: flex;
+	justify-content: space-between;
+	border-top: 1px solid #ddd;
+	padding: 12px;
+	button.yes {
+		background-color: red;
+		color: #fff;
+		padding: 4px 14px;
+		outline: none;
+		border: 2px solid red;
+		border-radius: 3px;
+		font-size: 16px;
+		&:hover {
+			background-color: #fff;
+			color: red;
+		}
+	}
+
+	button.no {
+		padding: 4px 14px;
+		outline: none;
+		border-radius: 3px;
+		font-size: 16px;
+		border: 2px solid #ddd;
+		&:hover {
+			background-color: #fff;
+			color: red;
+		}
+	}
 }
